@@ -4,9 +4,11 @@ const cors = require('cors');
 const { connectDB } = require('./db');
 const { SignUpModel } = require('./Schema');
 const dotenv = require('dotenv').config();
+const bcryptjs = require('bcryptjs');
 
 const app = express();
-const PORT = dotenv.parsed.PORT;
+//const PORT = dotenv.parsed.PORT;
+const PORT = process.env.PORT;
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -20,6 +22,9 @@ const SECRET_KEY = 'My_Secret_key';
 app.get("/", (req, res) => {
     res.send("Server working fine");
 });
+
+// console.log(process.env.MONGO_DB);
+// console.log(process.env.PORT, "PORT");
 
 app.post("/registration", async (req, res) => {
     try {
@@ -54,29 +59,28 @@ app.get("/findUserName", async (req, res) => {
     }
 });
 
-// app.get("/checkUserName", async (req, res) => {
-//     const token = req.headers.authorization?.split(' ')[1];
-  
-//     if (!token) {
-//         return res.status(401).json({ error: 'Unauthorized: Missing token' });
-//     }
+app.get("/login", async (req, res) => {
+    const { username, password } = req.query;
 
-//     try {
-//         const decoded = jwt.verify(token, SECRET_KEY);
-//         const { username } = decoded;
+    try {
+        const user = await SignUpModel.findOne({ username });
 
-//         const user = await SignUpModel.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ message: "Username not found" });
+        }
 
-//         if (user) {
-//             return res.status(200).json({ exists: true });
-//         } else {
-//             return res.status(404).json({ exists: false });
-//         }
-//     } catch (error) {
-//         console.error('Error occurred while verifying token:', error);
-//         return res.status(401).json({ error: 'Unauthorized: Invalid token' });
-//     }
-// });
+        const isPasswordMatch = await bcryptjs.compare(password, user.password);
+
+        if (!isPasswordMatch) {
+            return res.status(404).json({ message: "Incorrect password" });
+        }
+
+        res.status(200).json({ username: user.username, _id: user._id, password: isPasswordMatch });
+    } catch (error) {
+        console.error("Error occurred while logging in:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
 
 app.listen(PORT, () => {
     console.log("Server Started");
