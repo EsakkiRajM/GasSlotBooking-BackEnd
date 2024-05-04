@@ -36,44 +36,47 @@ app.post("/registration", async (req, res) => {
     }
 });
 
-// app.get("/findUserName", async (req, res) => {
+app.get("/findUserName", async (req, res) => {
+    try {
+        const username = req.query.username;
+        const user = await SignUpModel.findOne({ username: username });
+
+        if (user) {
+            console.log(user.username); // Print username if found
+            res.status(200).json({ username: user.username, _id: user._id }); // Send username as JSON response
+        } else {
+            console.log("User not found");
+            res.status(404).json({ error: "User not found" }); // Respond with error if user not found
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" }); // Handle internal server error
+    }
+});
+
+// app.get("/checkUserName", async (req, res) => {
+//     const token = req.headers.authorization?.split(' ')[1];
+  
+//     if (!token) {
+//         return res.status(401).json({ error: 'Unauthorized: Missing token' });
+//     }
+
 //     try {
-//         const username = req.query.username;
-//         const user = await SignUpModel.findOne({ username: username });
+//         const decoded = jwt.verify(token, SECRET_KEY);
+//         const { username } = decoded;
+
+//         const user = await SignUpModel.findOne({ username });
 
 //         if (user) {
-//             console.log(user.username); // Print username if found
-//             res.status(200).json({ username: user.username }); // Send username as JSON response
+//             return res.status(200).json({ exists: true });
 //         } else {
-//             console.log("User not found");
-//             res.status(404).json({ error: "User not found" }); // Respond with error if user not found
+//             return res.status(404).json({ exists: false });
 //         }
 //     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal Server Error" }); // Handle internal server error
+//         console.error('Error occurred while verifying token:', error);
+//         return res.status(401).json({ error: 'Unauthorized: Invalid token' });
 //     }
 // });
-
-app.get("/findUserName", async (req, res) => {
-    const token = req.headers.authorization?.split(' ')[1];
-  
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-
-  jwt.verify(token, SECRET_KEY, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
-
-    const { username } = decoded;
-    // Check if username exists in the database and send appropriate response
-    const usernameExists = checkIfUsernameExists(username); // Replace with your function to check username existence
-
-    return res.json({ exists: usernameExists });
-  });
-})
-
 
 app.listen(PORT, () => {
     console.log("Server Started");
