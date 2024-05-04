@@ -7,8 +7,8 @@ const dotenv = require('dotenv').config();
 const bcryptjs = require('bcryptjs');
 
 const app = express();
-//const PORT = dotenv.parsed.PORT;
-const PORT = process.env.PORT;
+const PORT = dotenv.parsed.PORT;
+//const PORT = process.env.PORT;
 
 app.use(bodyParser.json());
 app.use(cors());
