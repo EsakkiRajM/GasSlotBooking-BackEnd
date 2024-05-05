@@ -8,8 +8,16 @@ const SignUpSchema = new Schema({
     phonenumber: { type: String }
 })
 
+const ForgotPasswordSchema = new Schema({
+    username: { type: String },
+    otp: { type: String }
+})
+
+
 const SignUpModel = mongoose.model("SignUp", SignUpSchema);
+const ForgotpasswordModel = mongoose.model("forgotpassword", ForgotPasswordSchema);
 
 module.exports = {
-    SignUpModel 
+    SignUpModel,
+    ForgotpasswordModel
 }

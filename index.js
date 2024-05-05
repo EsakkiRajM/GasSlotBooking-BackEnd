@@ -2,9 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { connectDB } = require('./db');
-const { SignUpModel } = require('./Schema');
+const { SignUpModel, ForgotpasswordModel } = require('./Schema');
 const dotenv = require('dotenv').config();
 const bcryptjs = require('bcryptjs');
+const { v4: uuid } = require('uuid');
 
 const app = express();
 //const PORT = dotenv.parsed.PORT;
@@ -93,6 +94,39 @@ app.get("/login", async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 });
+
+// FindExist User and send OTP
+
+app.get("/findExistUser", async (req, res) => {
+    try {
+        const username = req.query.username;
+        const user = await SignUpModel.findOne({ username: username });
+        const OTP = uuid();
+        //console.log(typeof OTP);
+        const digitOTP = OTP.slice(0, 6);
+        console.log(digitOTP);
+        if (user) {
+            const forgotPasswordRes = await ForgotpasswordModel.create({
+                username: user.username,
+                otp: digitOTP
+            })
+            console.log(user.username); // Print username if found
+            res.status(200).json({ username: user.username, 
+                _id: user._id,
+                 OTP: digitOTP,
+                 OTP_id: forgotPasswordRes._id
+                }); // Send username as JSON response
+            console.log(forgotPasswordRes, "forgotPasswordRes");
+        } else {
+            console.log("User not found");
+            res.status(404).json({ error: "User not found" }); // Respond with error if user not found
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" }); // Handle internal server error
+    }
+});
+
 
 app.listen(PORT, () => {
     console.log("Server Started");
