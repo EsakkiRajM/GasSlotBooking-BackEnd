@@ -19,8 +19,20 @@ const jwt = require('jsonwebtoken');
 
 const SECRET_KEY = 'My_Secret_key';
 
+const auth = (req, res, next) => {
+   if(req.body.username || req.query.username){
+    next();
+   } else{
+    res.send("API ERROR")
+    console.log(req.body.username, req.query.username)
+   }
+}
+
+app.use(auth);
+
 app.get("/", (req, res) => {
     res.send("Server working fine");
+    console.log(req.body.username, req.query.username)
 });
 
 // console.log(process.env.MONGO_DB);
