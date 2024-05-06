@@ -5,7 +5,8 @@ const Schema = mongoose.Schema
 const SignUpSchema = new Schema({
     username: { type: String },
     password: { type: String },
-    phonenumber: { type: String }
+    phonenumber: { type: String },
+    isAdminLogIn: { type: Boolean }
 })
 
 const ForgotPasswordSchema = new Schema({

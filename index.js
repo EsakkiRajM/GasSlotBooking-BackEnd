@@ -6,10 +6,13 @@ const { SignUpModel, ForgotpasswordModel } = require('./Schema');
 const dotenv = require('dotenv').config();
 const bcryptjs = require('bcryptjs');
 const { v4: uuid } = require('uuid');
+const nodemailer = require("nodemailer");
 
 const app = express();
 //const PORT = dotenv.parsed.PORT;
 const PORT = process.env.PORT;
+const email = process.env.EMAIL
+const pass = process.env.PASS
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -45,6 +48,7 @@ app.post("/registration", async (req, res) => {
             username: req.body.username,
             password: req.body.password,
             phonenumber: req.body.phonenumber,
+            isAdminLogIn: false
         });
         console.log(data, "data");
         res.send(data);
@@ -117,6 +121,41 @@ app.get("/findExistUser", async (req, res) => {
                  OTP_id: forgotPasswordRes._id
                 }); // Send username as JSON response
             console.log(forgotPasswordRes, "forgotPasswordRes");
+            // nodemailer start
+            // if (forgotPasswordRes?._id) {
+            //     async function sendEmail() {
+            //       const transporter = nodemailer.createTransport({
+            //         host: "smtp.ethereal.email",
+            //         port: 587,
+            //         secure: false, // Use `true` for port 465, `false` for all other ports
+            //         auth: {
+            //           user: email,
+            //           pass: pass,
+            //         },
+            //       });
+              
+            //       try {
+            //         // Send mail with defined transport object
+            //         const info = await transporter.sendMail({
+            //           from: '"Esakki" <esakki2023@gmail.com>',
+            //           to: "raja@gmail.com",
+            //           subject: "Hello ✔",
+            //           text: "Hello world?",
+            //           html: "<b>Hello world?</b>",
+            //         });
+              
+            //         console.log("Message sent: %s", info.messageId);
+            //         // Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@ethereal.email>
+            //       } catch (error) {
+            //         console.error("Error sending email:", error);
+            //       }
+            //     }
+              
+            //     // Call the function to send the email
+            //     sendEmail();
+            //   }
+              
+            // // nodemailer end
         } else {
             console.log("User not found");
             res.status(404).json({ error: "User not found" }); // Respond with error if user not found
@@ -126,6 +165,53 @@ app.get("/findExistUser", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" }); // Handle internal server error
     }
 });
+
+//Submit OTP
+
+app.get("/submitOTP", async (req, res) => {
+    const { username, otp } = req.query;
+
+    try {
+        const user = await ForgotpasswordModel.findOne({ username, otp });
+
+        if (!user) {
+            return res.status(404).json({ message: "Username not found" });
+        }
+
+        res.status(200).json({ username: user.username, otp: user.otp});
+    } catch (error) {
+        console.error("Error occurred while logging in:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+// change password
+
+app.patch("/changePassword", async (req, res) => {
+    const { username, password } = req.query;
+
+    try {
+        const user = await SignUpModel.findOne({ username });
+
+        if (!user) {
+            return res.status(404).json({ message: "Username not found" });
+        }
+
+        // Hash the new password
+        //const hashedNewPassword = await bcryptjs.hash(password, 0);
+
+        // Update the user's password in the database
+        const changePasswordRes = await SignUpModel.updateOne({ _id: user._id }, { password: password });
+
+        console.log(changePasswordRes, "changePasswordRes");
+
+        res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+        console.error("Error occurred while updating password:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
 
 
 app.listen(PORT, () => {
