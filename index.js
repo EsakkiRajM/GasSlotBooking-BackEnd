@@ -2,17 +2,18 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { connectDB } = require('./db');
-const { SignUpModel, ForgotpasswordModel } = require('./Schema');
+const { SignUpModel, ForgotpasswordModel, CreateBookingModel  } = require('./Schema');
 const dotenv = require('dotenv').config();
 const bcryptjs = require('bcryptjs');
 const { v4: uuid } = require('uuid');
-const nodemailer = require("nodemailer");
+//const nodemailer = require("nodemailer");
+
 
 const app = express();
 //const PORT = dotenv.parsed.PORT;
 const PORT = process.env.PORT;
-const email = process.env.EMAIL
-const pass = process.env.PASS
+// const email = process.env.EMAIL
+// const pass = process.env.PASS
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -24,19 +25,19 @@ const jwt = require('jsonwebtoken');
 const SECRET_KEY = 'My_Secret_key';
 
 const auth = (req, res, next) => {
-   if(req.body.username || req.query.username){
-    next();
-   } else{
-    res.send("API ERROR")
-    console.log(req.body.username, req.query.username)
-   }
+    if (req.body.username || req.query.username) {
+        next();
+    } else {
+        res.send("API ERROR")
+        console.log(req.body.username, req.query.username)
+    }
 }
 
 app.use(auth);
 
 app.get("/", (req, res) => {
     res.send("Server working fine");
-    console.log(req.body.username, req.query.username)
+    //console.log(req.body.username, req.query.username)
 });
 
 // console.log(process.env.MONGO_DB);
@@ -91,8 +92,11 @@ app.get("/login", async (req, res) => {
         if (!isPasswordMatch) {
             return res.status(404).json({ message: "Incorrect password" });
         }
-
-        res.status(200).json({ username: user.username, _id: user._id, password: isPasswordMatch });
+        console.log(user);
+        res.status(200).json({
+            username: user.username, _id: user._id, password: isPasswordMatch, isAdminLogIn: user.isAdminLogIn,
+            phonenumber: user.phonenumber
+        });
     } catch (error) {
         console.error("Error occurred while logging in:", error);
         res.status(500).json({ message: "Internal server error" });
@@ -115,11 +119,12 @@ app.get("/findExistUser", async (req, res) => {
                 otp: digitOTP
             })
             console.log(user.username); // Print username if found
-            res.status(200).json({ username: user.username, 
+            res.status(200).json({
+                username: user.username,
                 _id: user._id,
-                 OTP: digitOTP,
-                 OTP_id: forgotPasswordRes._id
-                }); // Send username as JSON response
+                OTP: digitOTP,
+                OTP_id: forgotPasswordRes._id
+            }); // Send username as JSON response
             console.log(forgotPasswordRes, "forgotPasswordRes");
             // nodemailer start
             // if (forgotPasswordRes?._id) {
@@ -133,7 +138,7 @@ app.get("/findExistUser", async (req, res) => {
             //           pass: pass,
             //         },
             //       });
-              
+
             //       try {
             //         // Send mail with defined transport object
             //         const info = await transporter.sendMail({
@@ -143,18 +148,18 @@ app.get("/findExistUser", async (req, res) => {
             //           text: "Hello world?",
             //           html: "<b>Hello world?</b>",
             //         });
-              
+
             //         console.log("Message sent: %s", info.messageId);
             //         // Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@ethereal.email>
             //       } catch (error) {
             //         console.error("Error sending email:", error);
             //       }
             //     }
-              
+
             //     // Call the function to send the email
             //     sendEmail();
             //   }
-              
+
             // // nodemailer end
         } else {
             console.log("User not found");
@@ -178,7 +183,7 @@ app.get("/submitOTP", async (req, res) => {
             return res.status(404).json({ message: "Username not found" });
         }
 
-        res.status(200).json({ username: user.username, otp: user.otp});
+        res.status(200).json({ username: user.username, otp: user.otp });
     } catch (error) {
         console.error("Error occurred while logging in:", error);
         res.status(500).json({ message: "Internal server error" });
@@ -211,6 +216,32 @@ app.patch("/changePassword", async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 });
+
+// Create Booking
+
+app.post("/createBooking", async (req, res) => {
+    const username  = req.query.username;
+    try {
+        const data = await CreateBookingModel.create({
+            firstName: req.body.firstname,
+            lastName: req.body.lastName,
+            email: req.body.email,
+            addressOne: req.body.addressOne,
+            addressTwo: req.body.addressTwo,
+            phoneNumber: req.body.phoneNumber,
+            pinCode: req.body.pinCode,
+            gasProviderName:req.body.gasProviderName,
+            signUpId: req.body._id
+        });
+        console.log(data, "data");
+        res.status(200).json({ message: "Booking created successfully" });
+        //res.send(data);
+    } catch (error) {
+        console.error("Error occurred while registering user:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
 
 
 
