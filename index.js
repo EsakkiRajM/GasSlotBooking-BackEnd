@@ -223,7 +223,7 @@ app.post("/createBooking", async (req, res) => {
     const username  = req.query.username;
     try {
         const data = await CreateBookingModel.create({
-            firstName: req.body.firstname,
+            firstName: req.body.firstName,
             lastName: req.body.lastName,
             email: req.body.email,
             addressOne: req.body.addressOne,
@@ -231,7 +231,7 @@ app.post("/createBooking", async (req, res) => {
             phoneNumber: req.body.phoneNumber,
             pinCode: req.body.pinCode,
             gasProviderName:req.body.gasProviderName,
-            signUpId: req.body._id
+            signUpId: req.body.signUpId
         });
         console.log(data, "data");
         res.status(200).json({ message: "Booking created successfully" });
@@ -239,6 +239,21 @@ app.post("/createBooking", async (req, res) => {
     } catch (error) {
         console.error("Error occurred while registering user:", error);
         res.status(500).send("Internal Server Error");
+    }
+});
+
+// Get Booking details
+
+app.get("/getBookingDetails", async (req, res) => {
+    try {
+        const username = req.query.username;
+        const user = await CreateBookingModel.find({email: username});
+
+        res.send(user);
+        console.log(user, "user");
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" }); // Handle internal server error
     }
 });
 
