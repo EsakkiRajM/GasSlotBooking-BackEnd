@@ -324,6 +324,28 @@ app.delete("/cancelBooking", async (req, res) => {
     }
 });
 
+// get All customer details
+
+app.get("/getAllBookingDetails", async (req, res) => {
+    try {
+        const username = req.query.username;
+        const users = await CreateBookingModel.find({});
+
+        console.log(users);
+
+        if (users) {
+            //console.log(user.username); // Print username if found
+            //res.status(200).json({_id: users._id }); // Send username as JSON response
+            res.send(users);
+        } else {
+            console.log("User not found");
+            res.status(404).json({ error: "User not found" }); // Respond with error if user not found
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" }); // Handle internal server error
+    }
+});
 
 
 
