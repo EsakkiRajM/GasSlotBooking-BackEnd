@@ -260,7 +260,7 @@ app.get("/getBookingDetails", async (req, res) => {
 
 // getEditBookingDetails
 
-app.patch("/getEditBookingDetails", async (req, res) => {
+app.get("/getEditBookingDetails", async (req, res) => {
     try {
         const username = req.query.username;
         const bookingId = req.query.bookingId
@@ -306,6 +306,24 @@ app.patch("/updateBooking", async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 });
+
+// delete booking
+
+app.delete("/cancelBooking", async (req, res) => {
+    try {
+        const username = req.query.username;
+        const bookingId = req.query.bookingId
+        const user = await CreateBookingModel.deleteOne({ _id: bookingId });
+
+        //res.send(user);
+        console.log(user, "bookinguser");
+        res.status(200).json({ message: "Cancelled successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" }); // Handle internal server error
+    }
+});
+
 
 
 
