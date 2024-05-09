@@ -29,7 +29,7 @@ const auth = (req, res, next) => {
         next();
     } else {
         res.send("API ERROR")
-        console.log(req.body.username, req.query.username)
+        //console.log(req.body.username, req.query.username)
     }
 }
 
@@ -51,7 +51,7 @@ app.post("/registration", async (req, res) => {
             phonenumber: req.body.phonenumber,
             isAdminLogIn: false
         });
-        console.log(data, "data");
+        //console.log(data, "data");
         res.send(data);
     } catch (error) {
         console.error("Error occurred while registering user:", error);
@@ -65,10 +65,10 @@ app.get("/findUserName", async (req, res) => {
         const user = await SignUpModel.findOne({ username: username });
 
         if (user) {
-            console.log(user.username); // Print username if found
+            //console.log(user.username); // Print username if found
             res.status(200).json({ username: user.username, _id: user._id }); // Send username as JSON response
         } else {
-            console.log("User not found");
+            //console.log("User not found");
             res.status(404).json({ error: "User not found" }); // Respond with error if user not found
         }
     } catch (error) {
@@ -92,7 +92,7 @@ app.get("/login", async (req, res) => {
         if (!isPasswordMatch) {
             return res.status(404).json({ message: "Incorrect password" });
         }
-        console.log(user);
+        //console.log(user);
         res.status(200).json({
             username: user.username, _id: user._id, password: isPasswordMatch, isAdminLogIn: user.isAdminLogIn,
             phonenumber: user.phonenumber
@@ -112,20 +112,20 @@ app.get("/findExistUser", async (req, res) => {
         const OTP = uuid();
         //console.log(typeof OTP);
         const digitOTP = OTP.slice(0, 6);
-        console.log(digitOTP);
+        //console.log(digitOTP);
         if (user) {
             const forgotPasswordRes = await ForgotpasswordModel.create({
                 username: user.username,
                 otp: digitOTP
             })
-            console.log(user.username); // Print username if found
+            //console.log(user.username); // Print username if found
             res.status(200).json({
                 username: user.username,
                 _id: user._id,
                 OTP: digitOTP,
                 OTP_id: forgotPasswordRes._id
             }); // Send username as JSON response
-            console.log(forgotPasswordRes, "forgotPasswordRes");
+            //console.log(forgotPasswordRes, "forgotPasswordRes");
             // nodemailer start
             // if (forgotPasswordRes?._id) {
             //     async function sendEmail() {
@@ -162,7 +162,7 @@ app.get("/findExistUser", async (req, res) => {
 
             // // nodemailer end
         } else {
-            console.log("User not found");
+            //console.log("User not found");
             res.status(404).json({ error: "User not found" }); // Respond with error if user not found
         }
     } catch (error) {
@@ -208,7 +208,7 @@ app.patch("/changePassword", async (req, res) => {
         // Update the user's password in the database
         const changePasswordRes = await SignUpModel.updateOne({ _id: user._id }, { password: password });
 
-        console.log(changePasswordRes, "changePasswordRes");
+        //console.log(changePasswordRes, "changePasswordRes");
 
         res.status(200).json({ message: "Password updated successfully" });
     } catch (error) {
@@ -234,7 +234,7 @@ app.post("/createBooking", async (req, res) => {
             signUpId: req.body.signUpId,
             DateTime: req.body.DateTime
         });
-        console.log(data, "data");
+        //console.log(data, "data");
         res.status(200).json({ message: "Booking created successfully" });
         //res.send(data);
     } catch (error) {
@@ -251,7 +251,7 @@ app.get("/getBookingDetails", async (req, res) => {
         const user = await CreateBookingModel.find({ email: username });
 
         res.send(user);
-        console.log(user, "user");
+        //console.log(user, "user");
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" }); // Handle internal server error
@@ -267,7 +267,7 @@ app.get("/getEditBookingDetails", async (req, res) => {
         const user = await CreateBookingModel.findOne({ _id: bookingId });
 
         res.send(user);
-        console.log(user, "bookinguser");
+        //console.log(user, "bookinguser");
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" }); // Handle internal server error
@@ -287,7 +287,7 @@ app.patch("/updateBooking", async (req, res) => {
 
         const booking = await CreateBookingModel.findOne({ _id: bookingId });
 
-        console.log(booking, "booking");
+        //console.log(booking, "booking");
 
         if (!booking) {
             return res.status(404).json({ message: "Booking not found" });
@@ -298,7 +298,7 @@ app.patch("/updateBooking", async (req, res) => {
             pinCode, gasProviderName, DateTime
         });
 
-        console.log(updateBookingModel, "updateBookingModel");
+        //console.log(updateBookingModel, "updateBookingModel");
 
         res.status(200).json({ message: "Edit Booking Updated successfully" });
     } catch (error) {
@@ -316,7 +316,7 @@ app.delete("/cancelBooking", async (req, res) => {
         const user = await CreateBookingModel.deleteOne({ _id: bookingId });
 
         //res.send(user);
-        console.log(user, "bookinguser");
+        //console.log(user, "bookinguser");
         res.status(200).json({ message: "Cancelled successfully" });
     } catch (error) {
         console.error(error);
@@ -331,14 +331,14 @@ app.get("/getAllBookingDetails", async (req, res) => {
         const username = req.query.username;
         const users = await CreateBookingModel.find({});
 
-        console.log(users);
+        //console.log(users);
 
         if (users) {
             //console.log(user.username); // Print username if found
             //res.status(200).json({_id: users._id }); // Send username as JSON response
             res.send(users);
         } else {
-            console.log("User not found");
+            //console.log("User not found");
             res.status(404).json({ error: "User not found" }); // Respond with error if user not found
         }
     } catch (error) {
