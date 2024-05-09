@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { connectDB } = require('./db');
-const { SignUpModel, ForgotpasswordModel, CreateBookingModel  } = require('./Schema');
+const { SignUpModel, ForgotpasswordModel, CreateBookingModel } = require('./Schema');
 const dotenv = require('dotenv').config();
 const bcryptjs = require('bcryptjs');
 const { v4: uuid } = require('uuid');
@@ -220,7 +220,7 @@ app.patch("/changePassword", async (req, res) => {
 // Create Booking
 
 app.post("/createBooking", async (req, res) => {
-    const username  = req.query.username;
+    const username = req.query.username;
     try {
         const data = await CreateBookingModel.create({
             firstName: req.body.firstName,
@@ -230,8 +230,9 @@ app.post("/createBooking", async (req, res) => {
             addressTwo: req.body.addressTwo,
             phoneNumber: req.body.phoneNumber,
             pinCode: req.body.pinCode,
-            gasProviderName:req.body.gasProviderName,
-            signUpId: req.body.signUpId
+            gasProviderName: req.body.gasProviderName,
+            signUpId: req.body.signUpId,
+            DateTime: req.body.DateTime
         });
         console.log(data, "data");
         res.status(200).json({ message: "Booking created successfully" });
@@ -247,13 +248,62 @@ app.post("/createBooking", async (req, res) => {
 app.get("/getBookingDetails", async (req, res) => {
     try {
         const username = req.query.username;
-        const user = await CreateBookingModel.find({email: username});
+        const user = await CreateBookingModel.find({ email: username });
 
         res.send(user);
         console.log(user, "user");
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" }); // Handle internal server error
+    }
+});
+
+// getEditBookingDetails
+
+app.patch("/getEditBookingDetails", async (req, res) => {
+    try {
+        const username = req.query.username;
+        const bookingId = req.query.bookingId
+        const user = await CreateBookingModel.findOne({ _id: bookingId });
+
+        res.send(user);
+        console.log(user, "bookinguser");
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" }); // Handle internal server error
+    }
+});
+
+// updateBooking
+
+app.patch("/updateBooking", async (req, res) => {
+
+    const { username, bookingId } = req.query;
+
+    try {
+
+        const { firstName, lastName, email, addressOne, addressTwo, phoneNumber,
+            pinCode, gasProviderName, DateTime } = req.body
+
+        const booking = await CreateBookingModel.findOne({ _id: bookingId });
+
+        console.log(booking, "booking");
+
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        const updateBookingModel = await CreateBookingModel.updateOne({ _id: bookingId }, {
+            firstName, lastName, email, addressOne, addressTwo, phoneNumber,
+            pinCode, gasProviderName, DateTime
+        });
+
+        console.log(updateBookingModel, "updateBookingModel");
+
+        res.status(200).json({ message: "Edit Booking Updated successfully" });
+    } catch (error) {
+        console.error("Error occurred while updating password:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 });
 

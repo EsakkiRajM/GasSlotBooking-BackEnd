@@ -27,7 +27,8 @@ const CreateBooking = new Schema({
     gasProviderName: { type: String },
     //signUpId: { type: Array }
     //signUpId: [{ type: ObjectId, ref: 'SignUpModel' }] 
-    signUpId: { type: mongoose.Schema.Types.ObjectId, ref: 'SignUpModel' }
+    signUpId: { type: mongoose.Schema.Types.ObjectId, ref: 'SignUpModel' },
+    DateTime: { type: String }
 })
 
 
